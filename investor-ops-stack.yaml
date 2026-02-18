@@ -1,0 +1,152 @@
+---
+version: '1.0'
+name: investor-ops-stack
+description: Investor operations stack configuration for MCP-powered workflows
+
+# Stack Components
+components:
+  # MCP Servers
+  mcp_servers:
+    - name: git-server
+      service: maverick-mcp/git
+      config: codex-mcp-config.json
+      enabled: true
+      resources:
+        memory: 512Mi
+        cpu: 0.5
+    
+    - name: fetch-server
+      service: maverick-mcp/fetch
+      config: codex-mcp-config.json
+      enabled: true
+      resources:
+        memory: 256Mi
+        cpu: 0.25
+    
+    - name: time-server
+      service: maverick-mcp/time
+      config: codex-mcp-config.json
+      enabled: true
+      resources:
+        memory: 128Mi
+        cpu: 0.1
+
+  # Investor Operations Services
+  investor_services:
+    - name: portfolio-analyzer
+      type: analysis
+      dependencies:
+        - git-server
+        - fetch-server
+      capabilities:
+        - portfolio_tracking
+        - performance_metrics
+        - risk_assessment
+      
+    - name: market-data-collector
+      type: data-ingestion
+      dependencies:
+        - fetch-server
+        - time-server
+      capabilities:
+        - real_time_quotes
+        - historical_data
+        - market_news
+      
+    - name: investor-reporting
+      type: reporting
+      dependencies:
+        - git-server
+        - portfolio-analyzer
+      capabilities:
+        - quarterly_reports
+        - investment_summaries
+        - compliance_documents
+
+# Workflows
+workflows:
+  daily_operations:
+    - step: collect_market_data
+      service: market-data-collector
+      schedule: "0 9 * * 1-5"  # 9 AM on weekdays
+      
+    - step: analyze_portfolio
+      service: portfolio-analyzer
+      schedule: "0 10 * * 1-5"  # 10 AM on weekdays
+      depends_on: collect_market_data
+      
+    - step: generate_reports
+      service: investor-reporting
+      schedule: "0 17 * * 1-5"  # 5 PM on weekdays
+      depends_on: analyze_portfolio
+
+  quarterly_operations:
+    - step: comprehensive_analysis
+      service: portfolio-analyzer
+      schedule: "0 9 1 */3 *"  # 9 AM on first day of every quarter
+      
+    - step: regulatory_reporting
+      service: investor-reporting
+      schedule: "0 12 1 */3 *"  # 12 PM on first day of every quarter
+      depends_on: comprehensive_analysis
+
+# Integration Configuration
+integrations:
+  mcp_pool:
+    config_file: mcp-pool-config.json
+    pool: production
+    
+  codex:
+    config_file: codex-mcp-config.json
+    authentication:
+      type: api_key
+      key_env: CODEX_API_KEY
+
+# Environment Variables
+environment:
+  - name: LOG_LEVEL
+    value: info
+  - name: ENABLE_METRICS
+    value: "true"
+  - name: METRICS_PORT
+    value: "9090"
+  - name: INVESTOR_OPS_ENV
+    value: production
+
+# Security Configuration
+security:
+  network_policies:
+    - allow_outbound: true
+      allow_inbound: false
+      allowed_ports: [443, 80]
+  
+  secrets:
+    - name: api_credentials
+      type: kubernetes_secret
+      keys:
+        - CODEX_API_KEY
+        - DATABASE_PASSWORD
+
+# Monitoring & Observability
+observability:
+  logging:
+    enabled: true
+    level: info
+    format: json
+    destination: stdout
+  
+  metrics:
+    enabled: true
+    port: 9090
+    path: /metrics
+  
+  tracing:
+    enabled: true
+    service_name: investor-ops-stack
+    trace_sampling_rate: 0.1
+
+# Resource Limits
+resource_limits:
+  cpu: "2"
+  memory: 2Gi
+  storage: 10Gi

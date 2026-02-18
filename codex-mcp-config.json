@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "git": {
+      "type": "stdio",
+      "command": "/home/runner/work/ak_/ak_/maverick-mcp/src/git/.venv/bin/python",
+      "args": ["-m", "mcp_server_git"],
+      "description": "Git repository management and operations",
+      "env": {}
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "Web content fetching and conversion",
+      "env": {}
+    },
+    "time": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-time"],
+      "description": "Time and timezone conversion capabilities",
+      "env": {}
+    }
+  }
+}
