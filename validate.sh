@@ -35,7 +35,12 @@ for file in "${CONFIG_FILES[@]}"; do
         # Validate YAML files
         if [[ "$file" == *.yaml ]] || [[ "$file" == *.yml ]]; then
             if command -v python3 &> /dev/null; then
-                python3 -c "import yaml; yaml.safe_load(open('$file'))" 2>/dev/null && echo "  ✓ Valid YAML" || echo "  ✗ Invalid YAML"
+                if python3 -c "import yaml; yaml.safe_load(open('$file'))" 2>/dev/null; then
+                    echo "  ✓ Valid YAML"
+                else
+                    echo "  ✗ Invalid YAML"
+                    exit 1
+                fi
             else
                 echo "  ⚠ python3 not installed, skipping YAML validation"
             fi

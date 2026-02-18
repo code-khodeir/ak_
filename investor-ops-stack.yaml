@@ -143,7 +143,7 @@ observability:
   tracing:
     enabled: true
     service_name: investor-ops-stack
-    sampling_rate: 0.1
+    trace_sampling_rate: 0.1
 
 # Resource Limits
 resource_limits:
