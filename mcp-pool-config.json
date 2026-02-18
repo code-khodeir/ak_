@@ -1,0 +1,80 @@
+{
+  "version": "1.0",
+  "name": "reusable-mcp-pool",
+  "description": "Reusable MCP server pool configuration for various operations",
+  "pools": {
+    "development": {
+      "servers": [
+        {
+          "name": "git",
+          "enabled": true,
+          "priority": "high",
+          "timeout": 30000,
+          "retries": 3
+        },
+        {
+          "name": "fetch",
+          "enabled": true,
+          "priority": "medium",
+          "timeout": 15000,
+          "retries": 2
+        },
+        {
+          "name": "time",
+          "enabled": true,
+          "priority": "low",
+          "timeout": 5000,
+          "retries": 1
+        }
+      ],
+      "connectionPool": {
+        "minConnections": 1,
+        "maxConnections": 10,
+        "idleTimeout": 60000
+      }
+    },
+    "production": {
+      "servers": [
+        {
+          "name": "git",
+          "enabled": true,
+          "priority": "high",
+          "timeout": 60000,
+          "retries": 5
+        },
+        {
+          "name": "fetch",
+          "enabled": true,
+          "priority": "medium",
+          "timeout": 30000,
+          "retries": 3
+        },
+        {
+          "name": "time",
+          "enabled": true,
+          "priority": "low",
+          "timeout": 10000,
+          "retries": 2
+        }
+      ],
+      "connectionPool": {
+        "minConnections": 2,
+        "maxConnections": 20,
+        "idleTimeout": 120000
+      }
+    }
+  },
+  "loadBalancing": {
+    "strategy": "round-robin",
+    "healthCheck": {
+      "enabled": true,
+      "interval": 30000,
+      "timeout": 5000
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metricsInterval": 60000,
+    "logLevel": "info"
+  }
+}
